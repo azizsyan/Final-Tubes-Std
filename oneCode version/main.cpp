@@ -4,9 +4,9 @@ using namespace std;
 
 // Address Initiator
 
-typedef struct infotypeEmployee *adrEmployee;
-typedef struct infotypeShift *adrShift;
-typedef struct connector *adrConnector;
+typedef struct employeeList *adrEmployee;
+typedef struct shiftList *adrShift;
+typedef struct connectorList *adrConnector;
 
 // Linked List initiator
 
@@ -16,9 +16,9 @@ struct shiftList {
     adrShift next;
 };
 
-struct employeeList{
+struct employeeList {
     infotypeEmployee info;
-    adrEmployee next;
+    adrEmployee* next;
 };
 
 struct connectorList {
@@ -66,14 +66,14 @@ int baseScreen() {
 }
 
 int loginScreen(adrEmployee chunkUser){    
-    if (chunkUser -> ID == NULL) {
+    if (chunkUser -> info.ID == NULL) {
         cout << "Saat ini anda belum login sebagai User" << endl;
         cout << "Harap login terlebih dahulu untuk menggunakan fitur yang lengkap";
     } else {
-        cout << "Halo, saat ini anda masuk sebagai" << chunkUser -> name << endl;
+        cout << "Halo, saat ini anda masuk sebagai" << chunkUser -> info.name << endl;
     }
 
-    // if (chunkUser -> position == NULL || chunkUser -> salary == NULL) {
+    // if (chunkUser -> info.position ==  NULL) {
     //     cout << "Data belum lengkap, harap lengkapi data" << endl;
     // }
 
@@ -131,7 +131,7 @@ int shiftScreen() {
 
 // Login & Register Function Initiator
 
-void loginUser(employeeList* &list, adrEmployee &session);
+void loginUser(infotypeEmployee chunkInfo, adrEmployee &session);
 
 void registerUser(employeeList* &list, adrEmployee &session);
 
@@ -165,12 +165,37 @@ void connectShiftEmployee(shiftList* &shift);
 
 // Login & Register Function & Procedure 
 
-void registerUser(employeeList &list, adrEmployee &session) {
-    string chunkName;
+void registerUser(infotypeEmployee chunkInfo, adrEmployee &session) {
+    string chunkName, chunkPassword, chunkPassword2;
+    int chunkEmployeeID, passwordCheckerSession = 1;
 
+    // Input Phase
+    
     cout << "Silahkan masukkan data diri yang ingin di daftarkan : " << endl;
     cout << "Nama : ";
-    cin >> 
+    getline(cin, chunkName);
+    cout << "Employee ID : ";
+    cin >> chunkEmployeeID;
+    cout << "Password : ";
+    getline(cin, chunkPassword);
+    cout << "Masukkan kembali password : ";
+    getline(cin, chunkPassword2);
+    
+    // Checking Password Phase
+    while (chunkPassword != chunkPassword2 && passwordCheckerSession <= 3) {
+        getline(cin, chunkPassword);
+        cout << "Masukkan kembali password : ";
+        getline(cin, chunkPassword2);
+        passwordCheckerSession = passwordCheckerSession + 1;
+    }
+
+    // If Data password right
+
+    if (chunkPassword == chunkPassword2 && passwordCheckerSession <= 3) {
+        
+    }
+
+    // If data password wrong
 }   
 void loginUser(employeeList &list, adrEmployee &session) {
 
