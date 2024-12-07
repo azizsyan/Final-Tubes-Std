@@ -4,24 +4,24 @@ using namespace std;
 
 // Address Initiator
 
-typedef struct employeeList *adrEmployee;
-typedef struct shiftList *adrShift;
-typedef struct connectorList *adrConnector;
+typedef struct employeElement *adrEmployee;
+typedef struct shiftElement *adrShift;
+typedef struct connectorElement *adrConnector;
 
 // Linked List initiator
 
-struct shiftList {
+struct shiftElement {
     adrShift prev;
     infotypeShift info;
     adrShift next;
 };
 
-struct employeeList {
+struct employeElement {
     infotypeEmployee info;
     adrEmployee* next;
 };
 
-struct connectorList {
+struct connectorElement {
     adrEmployee employeeConnector;
     adrShift shiftConnector;
     adrConnector nextConnector;
@@ -129,53 +129,81 @@ int shiftScreen() {
     return 0;
 }
 
+// Basic SLL implementation - Employee
+
+void createListEmployee(employeElement &list);
+
+adrEmployee createElementEmployee(infotypeEmployee chunkInfo);
+
+bool isEmptyEmployee(employeElement &list);
+
+bool isDuplcateEmployee (employeElement &list, int &id);
+
+void insertLast(employeElement &list, adrEmployee addedElement);
+
+adrEmployee searchEmployeebyID (employeElement &list, int &id);
+
+// Basic DLL implementation - Employee
+
+
+
+
 // Login & Register Function Initiator
 
-void loginUser(infotypeEmployee chunkInfo, adrEmployee &session);
+void registerUser(employeElement &list, adrEmployee &session);
 
-void registerUser(employeeList* &list, adrEmployee &session);
+void loginUser(employeElement &list, adrEmployee &session);
 
-void logoutUser(employeeList* &List);
+void logoutUser(employeElement &list, adrEmployee &session);
 
-void adminModeratoring(employeeList* &List);
+void adminModeratoring (employeElement &list, adrEmployee &session);
 
-bool isLogin(adrEmployee chunkAccount);
+// bool isLogin(adrEmployee chunkAccount);
 
 // Employee Menu Function & Procedure Header Inititator
 
-void addEmployee(employeeList* &list);
+void addEmployee(employeElement* &list);
 
-void deleteEmployee(employeeList* &list);
+void deleteEmployee(employeElement* &list);
 
-void editEmployee(employeeList* &list);
+void editEmployee(employeElement* &list);
 
-void searchEmployee(employeeList* &list);
+void searchEmployee(employeElement* &list);
 
-void showEmployeeData(employeeList* &List);
+void showEmployeeData(employeElement* &List);
 
 // Shift Menu Function & Procedure Header Initiator
 
-void addShift(shiftList* &shift);
+void addShift(shiftElement* &shift);
 
-void deleteShift(shiftList* &shift);
+void deleteShift(shiftElement* &shift);
 
-void showShiftData(shiftList* &shift);
+void showShiftData(shiftElement* &shift);
 
-void connectShiftEmployee(shiftList* &shift);
+void connectShiftEmployee(shiftElement* &shift);
 
-// Login & Register Function & Procedure 
+// Basic SLL implementation - Employee
 
-void registerUser(infotypeEmployee chunkInfo, adrEmployee &session) {
-    string chunkName, chunkPassword, chunkPassword2;
-    int chunkEmployeeID, passwordCheckerSession = 1;
+adrEmployee createElementEmployee(infotypeEmployee chunkInfo);
 
+
+
+// Login & Register Function & Procedure
+
+void registerUser(employeElement &list, adrEmployee &session) {
+    infotypeEmployee chunkInfotype;
+    string chunkPassword, chunkPassword2;
+    int passwordCheckerSession = 1;
+    bool duplicateStatus;
+    adrEmployee chunkNewDataEmployee;
+    
     // Input Phase
     
     cout << "Silahkan masukkan data diri yang ingin di daftarkan : " << endl;
     cout << "Nama : ";
-    getline(cin, chunkName);
-    cout << "Employee ID : ";
-    cin >> chunkEmployeeID;
+    getline(cin, chunkInfotype.name);
+    cout << "ID pegawai : ";
+    cin >> chunkInfotype.ID;
     cout << "Password : ";
     getline(cin, chunkPassword);
     cout << "Masukkan kembali password : ";
@@ -188,18 +216,99 @@ void registerUser(infotypeEmployee chunkInfo, adrEmployee &session) {
         getline(cin, chunkPassword2);
         passwordCheckerSession = passwordCheckerSession + 1;
     }
+    
+    // Check if there duplicate data or no
 
+    duplicateStatus = isDuplcateEmployee(list, chunkInfotype.ID);
+    
     // If Data password right
 
     if (chunkPassword == chunkPassword2 && passwordCheckerSession <= 3) {
+        chunkInfotype.isAdmin = false;
+        chunkInfotype.password = chunkPassword;
         
+        chunkNewDataEmployee = createElementEmployee(chunkInfotype);
+        
+        session = chunkNewDataEmployee;
+
+        cout << "Data berhasil tersimpan, dan user bisa menggunakan aplikasi" << endl;
+        cout << "User harap melengkapi data diri di menu ubah data" << endl;
+    } 
+    
+    // If data password data wrong
+
+    else if (passwordCheckerSession >= 4) {
+        cout << "Anda memasukkan password yang salah sebanyak 3 kali" << endl;
+        cout << "Data tidak terfdaftar, silahkan kembali ke menu register user" << endl;
     }
 
-    // If data password wrong
-}   
-void loginUser(employeeList &list, adrEmployee &session) {
+    // if data duplicated
 
+    else if (duplicateStatus == true) {
+        cout << "Data ID yang dimasukkan sudah terdaftar" << endl;
+        cout << "Silahkan masuk dengan ID tersebut, atau hubungi teknisi/ admin jika lupa password" << endl;
+    }
+}   
+void loginUser(employeElement &list, adrEmployee &session) {
+    int chunkEmployeeID;
+    string chunkPassword;
+    adrEmployee dataFound;
+
+    // Input phase
+    cout << "Masukkan ID pegawai : " << endl;
+    cin >> chunkEmployeeID;
+    cout << "Masukkan Password : " << endl;
+    getline(cin, chunkPassword);
+
+    // Check Phase
+
+    dataFound = searchEmployeebyID(list, chunkEmployeeID);
+
+    // Login Phase
+
+    if (dataFound != NULL) {
+        
+        // If password right
+        
+        if (dataFound -> info.password == chunkPassword) {
+            session = dataFound;
+
+            cout << "Login berhasil, halo " << dataFound -> info.name << endl;
+        } 
+
+        // If password false
+
+        else {
+            cout << "Password salah silahkan coba lagi" << endl;
+        }
+    } 
+
+    // If data not found
+
+    else {
+        cout << "Data dengan ID yang di masukkan tidak ditemukan" << endl;
+        cout << "Silahkan daftar dengan menu daftar atau menu tambah pegawai" << endl;
+    }
 }
+
+void logoutUser(employeElement &list, adrEmployee session) {
+    // Logout phase
+
+    session = NULL;
+    cout << "Logout Sukses, untuk login gunakan fitur login kembali" << endl;
+}
+
+void adminModeratoring (employeElement &list, adrEmployee &session){
+    // Check is admin or not
+    if (session -> info.isAdmin == true) {
+        cout << "Masukkan ID employee yang ingin di jadikan admin : " << endl;
+        cin << chunkEmployeeID;
+        
+        dataFound = searchEmployeebyID(list, e)
+    }
+}
+
+
 // Main
 
 int main() {
