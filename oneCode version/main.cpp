@@ -8,6 +8,10 @@ typedef struct employeElement *adrEmployee;
 typedef struct shiftElement *adrShift;
 typedef struct connectorElement *adrConnector;
 
+// Default variable 
+
+string defaultPasswword = "Admin0"; 
+
 // Linked List initiator
 
 struct shiftElement {
@@ -73,9 +77,13 @@ int loginScreen(adrEmployee chunkUser){
         cout << "Halo, saat ini anda masuk sebagai" << chunkUser -> info.name << endl;
     }
 
-    // if (chunkUser -> info.position ==  NULL) {
-    //     cout << "Data belum lengkap, harap lengkapi data" << endl;
-    // }
+    if (chunkUser -> info.position == "") {
+        cout << "Data belum lengkap, harap lengkapi data" << endl;
+    }
+
+    if (chunkUser -> info.password == defaultPasswword) {
+        cout << "Data kata sandi anda masih default, harap untuk segera mengganti kata sandi anda" << endl;
+    }
 
     return 0;
 }
@@ -129,6 +137,16 @@ int shiftScreen() {
     return 0;
 }
 
+int adminModeratoringScreen() {
+    cout << "======================= !! KONFIRMASI !! ========================" << endl;
+    cout << "          USER ID YANG DIMASUKKAN AKAN DI JADIKAN ADMIN          " << endl;
+    cout << "   ID TERSEBUT AKAN BISA MENGUBAH SELURUH DATA PEGAWAI & SHIFT   " << endl;
+    cout << " HARAP KONFIRMASI DENGAN MENULIS PASSWORD ANDA UNTUK MELANJUTKAN " << endl;
+    cout << "=================================================================" << endl;
+    cout << "Silahkan Masukkan Password anda : ";
+
+    return 0;
+}
 // Basic SLL implementation - Employee
 
 void createListEmployee(employeElement &list);
@@ -137,11 +155,13 @@ adrEmployee createElementEmployee(infotypeEmployee chunkInfo);
 
 bool isEmptyEmployee(employeElement &list);
 
-bool isDuplcateEmployee (employeElement &list, int &id);
+bool isDuplcateEmployee(employeElement &list, int &id);
 
-void insertLast(employeElement &list, adrEmployee addedElement);
+void insertLastEmployee(employeElement &list, adrEmployee addedElement);
 
-adrEmployee searchEmployeebyID (employeElement &list, int &id);
+adrEmployee searchEmployeebyID(employeElement &list, int &id);
+
+void deleteAfterEmployee(employeElement &list, adrEmployee prev);
 
 // Basic DLL implementation - Employee
 
@@ -154,7 +174,7 @@ void registerUser(employeElement &list, adrEmployee &session);
 
 void loginUser(employeElement &list, adrEmployee &session);
 
-void logoutUser(employeElement &list, adrEmployee &session);
+void logoutUser(employeElement &list, adrEmployee session);
 
 void adminModeratoring (employeElement &list, adrEmployee &session);
 
@@ -162,11 +182,11 @@ void adminModeratoring (employeElement &list, adrEmployee &session);
 
 // Employee Menu Function & Procedure Header Inititator
 
-void addEmployee(employeElement* &list);
+void addEmployee(employeElement &list, adrEmployee &session);
 
-void deleteEmployee(employeElement* &list);
+void deleteEmployee(employeElement &list, adrEmployee &session);
 
-void editEmployee(employeElement* &list);
+void editEmployee(employeElement &list, adrEmployee &session);
 
 void searchEmployee(employeElement* &list);
 
@@ -198,7 +218,6 @@ void registerUser(employeElement &list, adrEmployee &session) {
     adrEmployee chunkNewDataEmployee;
     
     // Input Phase
-    
     cout << "Silahkan masukkan data diri yang ingin di daftarkan : " << endl;
     cout << "Nama : ";
     getline(cin, chunkInfotype.name);
@@ -209,7 +228,7 @@ void registerUser(employeElement &list, adrEmployee &session) {
     cout << "Masukkan kembali password : ";
     getline(cin, chunkPassword2);
     
-    // Checking Password Phase
+    // Input Password Phase
     while (chunkPassword != chunkPassword2 && passwordCheckerSession <= 3) {
         getline(cin, chunkPassword);
         cout << "Masukkan kembali password : ";
@@ -218,12 +237,10 @@ void registerUser(employeElement &list, adrEmployee &session) {
     }
     
     // Check if there duplicate data or no
-
     duplicateStatus = isDuplcateEmployee(list, chunkInfotype.ID);
-    
-    // If Data password right
 
-    if (chunkPassword == chunkPassword2 && passwordCheckerSession <= 3) {
+    // Checking Password phase 
+    if (chunkPassword == chunkPassword2 && passwordCheckerSession <= 3) { // If Data password right
         chunkInfotype.isAdmin = false;
         chunkInfotype.password = chunkPassword;
         
@@ -233,18 +250,10 @@ void registerUser(employeElement &list, adrEmployee &session) {
 
         cout << "Data berhasil tersimpan, dan user bisa menggunakan aplikasi" << endl;
         cout << "User harap melengkapi data diri di menu ubah data" << endl;
-    } 
-    
-    // If data password data wrong
-
-    else if (passwordCheckerSession >= 4) {
+    } else if (passwordCheckerSession >= 4) { // If data password data wrong
         cout << "Anda memasukkan password yang salah sebanyak 3 kali" << endl;
         cout << "Data tidak terfdaftar, silahkan kembali ke menu register user" << endl;
-    }
-
-    // if data duplicated
-
-    else if (duplicateStatus == true) {
+    } else if (duplicateStatus == true) { // if data duplicated
         cout << "Data ID yang dimasukkan sudah terdaftar" << endl;
         cout << "Silahkan masuk dengan ID tersebut, atau hubungi teknisi/ admin jika lupa password" << endl;
     }
@@ -261,31 +270,18 @@ void loginUser(employeElement &list, adrEmployee &session) {
     getline(cin, chunkPassword);
 
     // Check Phase
-
     dataFound = searchEmployeebyID(list, chunkEmployeeID);
 
     // Login Phase
-
     if (dataFound != NULL) {
-        
-        // If password right
-        
-        if (dataFound -> info.password == chunkPassword) {
+        if (dataFound -> info.password == chunkPassword) { // If password right
             session = dataFound;
 
             cout << "Login berhasil, halo " << dataFound -> info.name << endl;
-        } 
-
-        // If password false
-
-        else {
+        } else { // If password false
             cout << "Password salah silahkan coba lagi" << endl;
         }
-    } 
-
-    // If data not found
-
-    else {
+    } else { // If data not found
         cout << "Data dengan ID yang di masukkan tidak ditemukan" << endl;
         cout << "Silahkan daftar dengan menu daftar atau menu tambah pegawai" << endl;
     }
@@ -293,22 +289,135 @@ void loginUser(employeElement &list, adrEmployee &session) {
 
 void logoutUser(employeElement &list, adrEmployee session) {
     // Logout phase
-
     session = NULL;
     cout << "Logout Sukses, untuk login gunakan fitur login kembali" << endl;
 }
 
 void adminModeratoring (employeElement &list, adrEmployee &session){
+    int chunkEmployeeID;
+    adrEmployee dataFound;
+    string passwordConfirmation;
+
     // Check is admin or not
     if (session -> info.isAdmin == true) {
         cout << "Masukkan ID employee yang ingin di jadikan admin : " << endl;
-        cin << chunkEmployeeID;
+        cin >> chunkEmployeeID;
         
-        dataFound = searchEmployeebyID(list, e)
+        // Confirmation Policy
+        adminModeratoringScreen();
+
+        // Input password 
+        cin >> passwordConfirmation;
+        
+        // Check Password
+        if (passwordConfirmation == session -> info.password){
+            // Searching data 
+            dataFound = searchEmployeebyID(list, chunkEmployeeID);
+
+            if (dataFound != NULL) { // If data found 
+                session -> info.isAdmin = true;
+                cout << "Data dengan ID : " << dataFound -> info.ID << " dan Nama : " << dataFound -> info.name << " Sudah menjadi admin" << endl;
+                cout << "Jika itu adalah kesalahan, hapus data dan buat kembali" << endl;
+            } else { // If data didn't found
+                cout << "Data tidak di temukan, silahkan coba lagi" << endl;
+            }
+        } else { // If password admin false
+            cout << "Password salah silahkan ulangi lagi" << endl;
+        }
+    } else { // IF session not admin
+        cout << "Fitur ini hanya admin yang boleh menggunakan" << endl;
     }
 }
 
+// Employee Menu Function & Procedure 
 
+void addEmployee(employeElement &list, adrEmployee &session) {
+    infotypeEmployee chunkInfotype;
+    adrEmployee chunkNewDataEmployee;
+
+    // Check is in login condition
+    if (session != NULL) {
+        // Check is user can add employee
+        if (session -> info.isAdmin != NULL) {
+            // Input phase by Admin
+            cout << "Silahkan masukkan data diri yang ingin di daftarkan : " << endl;
+            cout << "Nama : ";
+            getline(cin, chunkInfotype.name);
+            cout << "ID pegawai : ";
+            cin >> chunkInfotype.ID;
+            cout << "Jabatan : ";
+            cin >> chunkInfotype.position;
+            cout << "Gaji : ";
+            cin >> chunkInfotype.salary;
+            cout << "Tanggal Bergabung : ";
+            cin >> chunkInfotype.joinedDate;
+
+            // Default value input
+            chunkInfotype.password = defaultPasswword;
+            chunkInfotype.isAdmin = false;
+            
+            // Make new element
+            chunkNewDataEmployee = createElementEmployee(chunkInfotype);
+
+            // Insert phase
+            insertLastEmployee(list, chunkNewDataEmployee);
+
+            // Message completed
+            cout << "Data tersimpan, dan bisa langsung digunakan" << endl;
+        } else { //If user cannot add employee
+            cout << "Maaf sekali, untuk menambah pegawai, harus admin yang masuk" << endl;
+        }
+    } else { // If condition not login
+        cout << "Anda harus login terlebih dahulu untuk menambah pegawai" << endl;
+    }
+}
+
+void deleteEmployee(employeElement &list, adrEmployee &session) {
+    string chunkPassword;
+    int chunkEmployeeID;
+    adrEmployee chunkAccount;
+
+    // Check if login condition
+    if (session == NULL) {
+        // Input session
+        cout << "Masukkan data pegawai yang datanya ingin di hapus : " << endl;
+        cout << "ID Pegawai : ";
+        cin >> chunkEmployeeID;
+        
+        // Search session
+        chunkAccount = searchEmployeebyID(list, chunkEmployeeID);
+
+        // If data founded
+        if (chunkAccount != NULL) {
+            // Check if user admin or not
+            if (session -> info.isAdmin == true || chunkAccount == session) {
+                // Confirmation phase
+                cout << "Konfirmasi data akan di hapus dengan memasukkan password anda : " << endl;
+                cin >> chunkPassword;
+                
+                // Check is the password same?
+                if (chunkPassword == session -> info.password) {
+                    deleteAfterEmployee(list, chunkAccount);
+                } else { // If the password false
+                    cout << "Password salah, konfirmasi gagal, harap coba lagi" << endl;
+                }
+            } else { // or user want to selfdelete the account
+                cout << "Maaf untuk menghapus data pegawai yang dimasukkan perlu akses admin, silahkan hubungi admin IT" << endl;
+            }
+        } else { // If data didn't found
+            cout << "Data tidak di temukan, harap coba lagi" << endl;
+        }
+    }
+}   
+
+void editEmployee(employeElement &list, adrEmployee &session) {
+    // Check is user login or not
+    if (session != NULL) {
+
+    } else { // If user didnt login
+        cout << "Anda harus login terlebih dahulu untuk mengubah data diri pegawai" << endl;
+    }
+}
 // Main
 
 int main() {
