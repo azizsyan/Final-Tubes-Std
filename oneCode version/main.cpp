@@ -22,7 +22,7 @@ struct shiftElement {
 
 struct employeElement {
     infotypeEmployee info;
-    adrEmployee* next;
+    adrEmployee next;
 };
 
 struct connectorElement {
@@ -147,6 +147,18 @@ int adminModeratoringScreen() {
 
     return 0;
 }
+
+int changeMenu() {
+    cout << "Silahkan masukkan pilihan data yang ingin di rubah : " << endl;
+    cout << "1. Nama" << endl;
+    cout << "2. Jabatan" << endl;
+    cout << "3. Gaji" << endl;
+    cout << "4. Tanggal Bergabung" << endl;
+    cout << "5. Password" << endl;
+    cout << "Jika sudah selesai bisa keluar dengan menulis angka 6." << endl;
+
+    return 0;
+}
 // Basic SLL implementation - Employee
 
 void createListEmployee(employeElement &list);
@@ -188,9 +200,9 @@ void deleteEmployee(employeElement &list, adrEmployee &session);
 
 void editEmployee(employeElement &list, adrEmployee &session);
 
-void searchEmployee(employeElement* &list);
+void searchEmployee(employeElement &list, adrEmployee &session);
 
-void showEmployeeData(employeElement* &List);
+void showEmployeeData(employeElement &List, adrEmployee &session);
 
 // Shift Menu Function & Procedure Header Initiator
 
@@ -411,13 +423,181 @@ void deleteEmployee(employeElement &list, adrEmployee &session) {
 }   
 
 void editEmployee(employeElement &list, adrEmployee &session) {
+    int chunkEmployeeID, serviceAllocator = 1;
+    adrEmployee chunkAccount;
+    string chunkNewName, chunkNewPosition, chunkNewSalary, chunkNewJoinDate, chunkNewPassword;
+
     // Check is user login or not
     if (session != NULL) {
+        // input phase
+        cout << "Masukkan ID pegawai yang datanya ingin di ubah : ";
+        cin >> chunkEmployeeID;
 
+        // Search phase
+        chunkAccount = searchEmployeebyID(list, chunkEmployeeID);
+        
+        // Check if data fiunded or not
+        if (chunkAccount != NULL) {
+            // Check if data will change is same in person
+            if ((session -> info.ID == chunkAccount -> info.ID) || (session -> info.ID != chunkAccount -> info.ID && session -> info.isAdmin == true)) {
+                while (serviceAllocator >= 1 && serviceAllocator <= 5) {
+                    changeMenu();
+                    cin >> serviceAllocator;
+                    if (serviceAllocator == 1) {
+                        cout << "Masukkan nama baru : ";
+                        getline(cin, chunkNewName);
+
+                        chunkAccount -> info.name = chunkNewName;
+                        cout << "Data Nama sudah dirubah" << endl;
+                    } else if (serviceAllocator == 2) {
+                        cout << "Masukkan jabatan baru : ";
+                        getline(cin, chunkNewPosition);
+
+                        chunkAccount -> info.position = chunkNewPosition;
+                        cout << "Data position sudah dirubah" << endl;
+                    } else if (serviceAllocator == 3) {
+                        cout << "Masukkan gaji baru : ";
+                        getline(cin, chunkNewSalary);
+
+                        chunkAccount -> info.salary = chunkNewSalary;
+                        cout << "Data gaji sudah di rubah" << endl; 
+                    } else if (serviceAllocator == 4) {
+                        cout << "Masukkan Tanggal Bergabbung yang baru : " << endl;
+                        getline(cin, chunkNewJoinDate);
+
+                        chunkAccount -> info.joinedDate = chunkNewJoinDate;
+                        cout << "Data tanggal bergabung sudah di rubah" << endl;
+                    } else if (serviceAllocator == 5) {
+                        cout << "Masukkan Password yang baru :" << endl;
+                        getline(cin, chunkNewPassword);
+
+                        chunkAccount -> info.password = chunkNewPassword;
+                        cout << "Password sudah di rubah" << endl;
+                    }
+                }
+            } else if (session -> info.ID != chunkAccount -> info.ID && session -> info.isAdmin != true) {
+                cout << "Maaf anda tidak bisa merubah data tersbut, silahkan hubungi admin untuk lebih jelas" << endl;
+            }
+        } else {
+            cout << "Data yang di cari tidak di temukan silahkan coba lagi" << endl;
+        }
     } else { // If user didnt login
         cout << "Anda harus login terlebih dahulu untuk mengubah data diri pegawai" << endl;
     }
 }
+
+void searchEmployee(employeElement &list, adrEmployee &session) {
+    int chunkDesicionSearch, chunkEmployeeID;
+    adrEmployee chunkAcoount;
+    string chunkEmployeeName;
+
+    // Desicion of choosing search by
+    cout << " Masukkan menu aplikasi : ";
+    cin >> chunkDesicionSearch;
+    
+    // If choose by ID
+    if (chunkDesicionSearch == 1) {
+        // Input ID phase
+        cout << "Masukkan ID yang ingin di cari" << endl;
+        cin >> chunkEmployeeID;
+        
+        // Search phase
+        chunkAcoount = searchEmployeebyID(list, chunkEmployeeID);
+
+        // Check if founded or not
+        if (chunkAcoount != NULL) {
+            // Check if user login
+            if (session != NULL) {
+                // Check if user seeing his own data
+                if (session == chunkAcoount) {
+                    cout << "Data berdasarkan ID yang dicari ketemu" << endl;
+                    cout << "==========================================================" << endl;
+                    cout << "Nama              : " << chunkAcoount -> info.name << endl;
+                    cout << "ID                : " << chunkAcoount -> info.ID << endl;
+                    cout << "Jabatan           : " << chunkAcoount -> info.position << endl;
+                    cout << "Gaji              : " << chunkAcoount -> info.salary << endl;
+                    cout << "Tanggal Bergabung : " << chunkAcoount -> info.joinedDate << endl;
+                    cout << "==========================================================" << endl;
+                } else if (session != chunkAcoount) { // if user seeing other data
+                    // Check if user admin
+                    if (session -> info.isAdmin == true) {
+                        cout << "Data berdasarkan ID yang dicari ketemu" << endl;
+                        cout << "==========================================================" << endl;
+                        cout << "Nama              : " << chunkAcoount -> info.name << endl;
+                        cout << "ID                : " << chunkAcoount -> info.ID << endl;
+                        cout << "Jabatan           : " << chunkAcoount -> info.position << endl;
+                        cout << "Gaji              : " << chunkAcoount -> info.salary << endl;
+                        cout << "Tanggal Bergabung : " << chunkAcoount -> info.joinedDate << endl;
+                        cout << "==========================================================" << endl;
+                    } else { // If user didn't admin
+                        cout << "Data berdasarkan ID yang dicari ketemu" << endl;
+                        cout << "==========================================================" << endl;
+                        cout << "Nama              : " << chunkAcoount -> info.name << endl;
+                        cout << "ID                : " << chunkAcoount -> info.ID << endl;
+                        cout << "Jabatan           : " << chunkAcoount -> info.position << endl;
+                        cout << "==========================================================" << endl;
+                    }
+                }
+            } else { // User didn't login 
+                cout << "Maaf anda harus login terlebih dahulu" << endl;
+            }
+        } else { // If data not found
+            cout << "Maaf data berdasarkan ID yang anda masukkan tidak ketemu, silahkan coba lagi" << endl;
+        }
+    } else if (chunkDesicionSearch == 2) {
+        cout << "Masukkan nama yang ingin di cari : ";
+        cin >> chunkEmployeeName;
+
+        chunkAcoount = searchEmployeebyName(list, chunkEmployeeName);
+
+        // Check if data found or not
+        if (chunkAcoount != NULL) {
+            // Check if user login
+            if (session != NULL) {
+                // Check if user seeing his own data
+                if (session == chunkAcoount) {
+                    cout << " Data berdasarkan nama yang dicari ketemu" << endl;
+                    cout << "==========================================================" << endl;
+                    cout << "Nama              : " << chunkAcoount -> info.name << endl;
+                    cout << "ID                : " << chunkAcoount -> info.ID << endl;
+                    cout << "Jabatan           : " << chunkAcoount -> info.position << endl;
+                    cout << "Gaji              : " << chunkAcoount -> info.salary << endl;
+                    cout << "Tanggal Bergabung : " << chunkAcoount -> info.joinedDate << endl;
+                    cout << "==========================================================" << endl;
+                } else { // if user seeing other data
+                    if (session -> info.isAdmin == true) {
+                        cout << "Data berdasarkan nama yang dicari ketemu" << endl;
+                        cout << "==========================================================" << endl;
+                        cout << "Nama              : " << chunkAcoount -> info.name << endl;
+                        cout << "ID                : " << chunkAcoount -> info.ID << endl;
+                        cout << "Jabatan           : " << chunkAcoount -> info.position << endl;
+                        cout << "Gaji              : " << chunkAcoount -> info.salary << endl;
+                        cout << "Tanggal Bergabung : " << chunkAcoount -> info.joinedDate << endl;
+                        cout << "==========================================================" << endl;
+                    } else { // If user didn't admin
+                        cout << "Data berdasarkan nama yang dicari ketemu" << endl;
+                        cout << "==========================================================" << endl;
+                        cout << "Nama              : " << chunkAcoount -> info.name << endl;
+                        cout << "ID                : " << chunkAcoount -> info.ID << endl;
+                        cout << "Jabatan           : " << chunkAcoount -> info.position << endl;
+                        cout << "==========================================================" << endl;
+                    }
+                }
+            } else { // If user didn't login
+                cout << "Maaf anda harus login terlebih dahulu" << endl;
+            }
+        } else { // If Data not found
+            cout << "Data berdasarkan nama yang anda masukkan tidak ketemu, silahkan coba lagi" << endl;
+        }
+    } else { // If user didn't choose the right option
+        cout << "Maaf nomor yang anda masukkan tidak valid, silahkan coba lagi" << endl;
+    }
+}
+
+void showEmployeeData() {
+
+}
+
 // Main
 
 int main() {
